@@ -1,7 +1,10 @@
 package com.oop.deepclean;
 
+import java.io.*;
 import java.awt.*;
+import java.awt.image.*;
 import javax.swing.*;
+import javax.imageio.*;
 
 public class GamePanel extends JPanel {
     private DeepCleanGame controller;
@@ -27,11 +30,23 @@ public class GamePanel extends JPanel {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
+        // Textures are placeholders for now because I suck at art
+        // 0. Textures
+        BufferedImage water;
+        TexturePaint background_texture = null;
+        try {
+            File bkg_texture = new File("./src/main/java/com/oop/deepclean/resources/placeholder-background-sprite.png");
+            System.out.println("" + System.getProperty("user.dir"));
+            water = ImageIO.read(bkg_texture);
+            background_texture = new TexturePaint( water, new Rectangle(this.getWidth(), this.getHeight()));
+        } catch (IOException ex) {
+            System.getLogger(GamePanel.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
+        
+        
+        
         // 1. Water Gradient
-        Color surfaceColor = new Color(51, 204, 255);
-        Color deepColor = new Color(0, 51, 102);
-        GradientPaint watergp = new GradientPaint(0, 0, surfaceColor, 0, getHeight() * 0.85f, deepColor);
-        g2d.setPaint(watergp);
+        g2d.setPaint(background_texture);
         g2d.fillRect(0, 0, getWidth(), getHeight());
 
         // 2. Sand Floor
