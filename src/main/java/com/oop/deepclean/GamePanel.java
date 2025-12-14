@@ -32,13 +32,20 @@ public class GamePanel extends JPanel {
 
         // Textures are placeholders for now because I suck at art
         // 0. Textures
-        BufferedImage water;
-        TexturePaint background_texture = null;
+        BufferedImage water, sand, seaweed;
+        TexturePaint water_texture = null;
+        TexturePaint sand_texture = null;
+        TexturePaint seaweed_texture = null;
         try {
-            File bkg_texture = new File("./src/main/java/com/oop/deepclean/resources/placeholder-background-sprite.png");
-            System.out.println("" + System.getProperty("user.dir"));
-            water = ImageIO.read(bkg_texture);
-            background_texture = new TexturePaint( water, new Rectangle(this.getWidth(), this.getHeight()));
+            File wtr_texture_file = new File("./src/main/java/com/oop/deepclean/resources/placeholder-background-sprite.png");
+            File snd_texture_file = new File("./src/main/java/com/oop/deepclean/resources/placeholder-sand-sprite.png");
+            File swd_texture_file = new File("./src/main/java/com/oop/deepclean/resources/placeholder-seaweed-sprite.png");
+            water = ImageIO.read(wtr_texture_file);
+            water_texture = new TexturePaint( water, new Rectangle(this.getWidth(), this.getHeight()));
+            sand =  ImageIO.read(snd_texture_file);
+            sand_texture = new TexturePaint( sand, new Rectangle(this.getWidth(), this.getHeight()));
+            seaweed = ImageIO.read(swd_texture_file);
+            seaweed_texture = new TexturePaint( seaweed, new Rectangle(this.getWidth(), this.getHeight()));
         } catch (IOException ex) {
             System.getLogger(GamePanel.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
@@ -46,17 +53,16 @@ public class GamePanel extends JPanel {
         
         
         // 1. Water Gradient
-        g2d.setPaint(background_texture);
+        g2d.setPaint(water_texture);
         g2d.fillRect(0, 0, getWidth(), getHeight());
 
         // 2. Sand Floor
-        Color sandColor = new Color(210, 180, 140);
-        g2d.setColor(sandColor);
+        g2d.setPaint(sand_texture);
         int sandHeight = (int)(getHeight() * 0.15);
         g2d.fillRect(0, getHeight() - sandHeight, getWidth(), sandHeight);
         
         // 3. Simple Seaweed Detail
-        g2d.setColor(new Color(34, 139, 34));
+        g2d.setPaint(seaweed_texture);
         for(int i = 50; i < getWidth(); i += 100) {
             g2d.fillOval(i, getHeight() - sandHeight - 30, 15, 40);
         }
