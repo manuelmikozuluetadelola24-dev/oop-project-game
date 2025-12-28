@@ -1,7 +1,10 @@
 package com.oop.deepclean;
 
-import java.awt.*;
-import javax.swing.*;
+import java.awt.CardLayout;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 public class DeepCleanGame extends JFrame {
     private CardLayout cardLayout;
