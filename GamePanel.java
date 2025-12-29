@@ -24,7 +24,14 @@ public class GamePanel extends JPanel implements ActionListener {
     private int playerY = 362;
     private int score = 0;
     private final int playerSpeed = 6;
-    private boolean mirror = false;
+    private boolean mirror = false; // false = Right, true = Left
+
+    // Animation State
+    private Image[] rightFrames;
+    private Image[] leftFrames;
+    private int currentFrame = 0;
+    private int animationDelay = 5; 
+    private int animationTimer = 0;
 
     // Environment Scrolling
     private int backgroundOffset = 0;
@@ -39,44 +46,53 @@ public class GamePanel extends JPanel implements ActionListener {
     private boolean up, down, left, right;
     private Timer gameTimer;
 
-    // Player Animation
-    private Image swimRight, swimLeft;
-
     public GamePanel() {
         setFocusable(true);
         loadAssets();
         setupControls();
         spawnTrash(10);
-        gameTimer = new Timer(16, this);
+        gameTimer = new Timer(16, this); // ~60 FPS
         gameTimer.start();
     }
 
     private void loadAssets() {
         try {
-            swimRight = ImageIO.read(new File("Swim_AnimationRight.png"));
-            swimLeft = ImageIO.read(new File("Swim_AnimationLeft.png"));
+            rightFrames = new Image[4];
+            leftFrames = new Image[4];
+
+            rightFrames[0] = ImageIO.read(new File("Swim frame 1 (Right).png"));
+            rightFrames[1] = ImageIO.read(new File("Swim frame 2 (Right).png"));
+            rightFrames[2] = ImageIO.read(new File("Swim frame 3 (Right).png"));
+            rightFrames[3] = ImageIO.read(new File("Swim frame 4 (Right).png"));
+
+            leftFrames[0] = ImageIO.read(new File("Swim frame 1 (Left).png"));
+            leftFrames[1] = ImageIO.read(new File("Swim frame 2 (Left).png"));
+            leftFrames[2] = ImageIO.read(new File("Swim frame 3 (Left).png"));
+            leftFrames[3] = ImageIO.read(new File("Swim frame 4(Left).png")); 
+
+            bottleImg = ImageIO.read(new File("bottle.png"));
+            bagImg = ImageIO.read(new File("plastic.png"));
+            canImg = ImageIO.read(new File("can.png"));
             
-            // Assets folder paths
-            bottleImg = ImageIO.read(new File("assets/bottle.png"));
-            bagImg = ImageIO.read(new File("assets/plastic_bag.png"));
-            canImg = ImageIO.read(new File("assets/can.png"));
         } catch (Exception e) {
-            System.out.println("Some assets not found. Using placeholders.");
+            System.out.println("Error loading assets: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     private void spawnTrash(int count) {
         int startX = (getWidth() > 0) ? getWidth() : 1024;
+
         Image[] choices = {bottleImg, bagImg, canImg};
-        
         for (int i = 0; i < count; i++) {
             int x = backgroundOffset + startX + random.nextInt(1000);
             int y = random.nextInt(500) + 100;
-            
+
             Image randomSprite = null;
-            if (bottleImg != null || bagImg != null || canImg != null) {
+            if (bottleImg != null) {
                 randomSprite = choices[random.nextInt(3)];
             }
+
             trashList.add(new TrashObject(x, y, randomSprite));
         }
     }
@@ -84,6 +100,7 @@ public class GamePanel extends JPanel implements ActionListener {
     private void setupControls() {
         InputMap im = getInputMap(WHEN_IN_FOCUSED_WINDOW);
         ActionMap am = getActionMap();
+
         addBinding(im, am, "W", "up");
         addBinding(im, am, "S", "down");
         addBinding(im, am, "A", "left");
@@ -104,18 +121,36 @@ public class GamePanel extends JPanel implements ActionListener {
     private void setMove(String name, boolean active) {
         if (name.equals("up")) up = active;
         if (name.equals("down")) down = active;
-        if (name.equals("left")) { left = active; if(active) mirror = true; }
-        if (name.equals("right")) { right = active; if(active) mirror = false; }
+        if (name.equals("left")) { left = active; if (active) mirror = true; }
+        if (name.equals("right")) { right = active; if (active) mirror = false; }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (up && playerY > 50) playerY -= playerSpeed;
-        if (down && playerY < getHeight() - 150) playerY += playerSpeed;
-        if (left) backgroundOffset -= scrollSpeed;
-        if (right) backgroundOffset += scrollSpeed;
+        // 1. Movement Logic
+        boolean isMoving = false;
+        
+        if (up && playerY > 50) { playerY -= playerSpeed; isMoving = true; }
+        if (down && playerY < getHeight() - 150) { playerY += playerSpeed; isMoving = true; }
+        if (left) { backgroundOffset -= scrollSpeed; isMoving = true; }
+        if (right) { backgroundOffset += scrollSpeed; isMoving = true; }
 
-        Rectangle playerRect = new Rectangle(playerX, playerY, 80, 50);
+        // 2. Animation Logic
+        if (isMoving) {
+            animationTimer++;
+            if (animationTimer >= animationDelay) {
+                currentFrame = (currentFrame + 1) % 4; 
+                animationTimer = 0;
+            }
+        } else {
+            currentFrame = 0;
+            animationTimer = 0;
+        }
+
+        // 3. Collision Logic
+        // INCREASED HITBOX SIZE (approx 100x70) to match visual
+        Rectangle playerRect = new Rectangle(playerX, playerY, 100, 70);
+        
         for (int i = 0; i < trashList.size(); i++) {
             TrashObject t = trashList.get(i);
             int screenX = t.bounds.x - backgroundOffset;
@@ -123,6 +158,7 @@ public class GamePanel extends JPanel implements ActionListener {
                 trashList.remove(i);
                 score += 10;
                 spawnTrash(1);
+                i--; 
             }
         }
         repaint();
@@ -133,18 +169,19 @@ public class GamePanel extends JPanel implements ActionListener {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
-        // Background
+        // 1. Blue Background
         g2d.setColor(new Color(0, 51, 153));
         g2d.fillRect(0, 0, getWidth(), getHeight());
 
-        // Bubbles
+        // 2. Bubbles
         g2d.setColor(new Color(255, 255, 255, 60));
         for (int i = 0; i < 20; i++) {
             int bx = (i * 200 - (backgroundOffset % (getWidth() + 200)));
-            g2d.fillOval(bx, (i * 70) % getHeight(), 4, 4);
+            if (bx < -10) bx += (getWidth() + 200); 
+            g2d.fillOval(bx, (i * 70) % getHeight(), 6, 6);
         }
 
-        // Trash
+        // 3. Trash
         for (TrashObject t : trashList) {
             int screenX = t.bounds.x - backgroundOffset;
             if (t.sprite != null) {
@@ -155,16 +192,25 @@ public class GamePanel extends JPanel implements ActionListener {
             }
         }
 
-        // Diver
-        Image currentFrame = mirror ? swimLeft : swimRight;
-        if (currentFrame != null) {
-            g2d.drawImage(currentFrame, playerX, playerY, 120, 80, this);
+        // 4. Diver Animation
+        Image spriteToDraw = null;
+        
+        if (mirror) {
+            if (leftFrames[currentFrame] != null) spriteToDraw = leftFrames[currentFrame];
         } else {
-            g2d.setColor(Color.YELLOW);
-            g2d.fillRect(playerX, playerY, 120, 80);
+            if (rightFrames[currentFrame] != null) spriteToDraw = rightFrames[currentFrame];
         }
 
-        // Score
+        // Draw the diver
+        if (spriteToDraw != null) {
+            // INCREASED DRAWING SIZE: 160 width, 110 height
+            g2d.drawImage(spriteToDraw, playerX, playerY, 160, 110, this);
+        } else {
+            g2d.setColor(Color.YELLOW);
+            g2d.fillRect(playerX, playerY, 160, 110);
+        }
+
+        // 5. UI
         g2d.setColor(Color.WHITE);
         g2d.setFont(new Font("Arial", Font.BOLD, 20));
         g2d.drawString("Score: " + score, 20, 40);
