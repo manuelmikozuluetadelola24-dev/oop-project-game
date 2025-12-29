@@ -1,5 +1,6 @@
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -19,6 +20,10 @@ import javax.swing.KeyStroke;
 import javax.swing.Timer;
 
 public class GamePanel extends JPanel implements ActionListener {
+    // Game Settings
+    private final int WIN_SCORE = 200; // Win after collecting 20 items (10 pts each)
+    private boolean gameWon = false;
+
     // Player State
     private int playerX = 487;
     private int playerY = 362;
@@ -127,6 +132,12 @@ public class GamePanel extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        // If game is won, stop updating logic (but keep repainting for the message)
+        if (gameWon) {
+            repaint();
+            return;
+        }
+
         // 1. Movement Logic
         boolean isMoving = false;
         
@@ -147,8 +158,7 @@ public class GamePanel extends JPanel implements ActionListener {
             animationTimer = 0;
         }
 
-        // 3. Collision Logic
-        // INCREASED HITBOX SIZE (approx 100x70) to match visual
+        // 3. Collision Logic (Enlarged Player 100x70)
         Rectangle playerRect = new Rectangle(playerX, playerY, 100, 70);
         
         for (int i = 0; i < trashList.size(); i++) {
@@ -161,6 +171,12 @@ public class GamePanel extends JPanel implements ActionListener {
                 i--; 
             }
         }
+
+        // 4. Check Win Condition
+        if (score >= WIN_SCORE) {
+            gameWon = true;
+        }
+
         repaint();
     }
 
@@ -192,27 +208,53 @@ public class GamePanel extends JPanel implements ActionListener {
             }
         }
 
-        // 4. Diver Animation
+        // 4. Diver Animation (Enlarged 160x110)
         Image spriteToDraw = null;
-        
         if (mirror) {
             if (leftFrames[currentFrame] != null) spriteToDraw = leftFrames[currentFrame];
         } else {
             if (rightFrames[currentFrame] != null) spriteToDraw = rightFrames[currentFrame];
         }
 
-        // Draw the diver
         if (spriteToDraw != null) {
-            // INCREASED DRAWING SIZE: 160 width, 110 height
             g2d.drawImage(spriteToDraw, playerX, playerY, 160, 110, this);
         } else {
             g2d.setColor(Color.YELLOW);
             g2d.fillRect(playerX, playerY, 160, 110);
         }
 
-        // 5. UI
+        // 5. HUD (Score)
         g2d.setColor(Color.WHITE);
         g2d.setFont(new Font("Arial", Font.BOLD, 20));
-        g2d.drawString("Score: " + score, 20, 40);
+        g2d.drawString("Score: " + score + " / " + WIN_SCORE, 20, 40);
+
+        // 6. Win Screen Overlay
+        if (gameWon) {
+            // Darken screen
+            g2d.setColor(new Color(0, 0, 0, 150));
+            g2d.fillRect(0, 0, getWidth(), getHeight());
+
+            // Draw Box
+            g2d.setColor(Color.WHITE);
+            g2d.setStroke(new java.awt.BasicStroke(5));
+            g2d.drawRect(getWidth()/2 - 200, getHeight()/2 - 100, 400, 200);
+            g2d.setColor(new Color(0, 51, 153));
+            g2d.fillRect(getWidth()/2 - 200, getHeight()/2 - 100, 400, 200);
+
+            // Draw Text
+            g2d.setColor(Color.YELLOW);
+            g2d.setFont(new Font("Arial", Font.BOLD, 40));
+            String msg = "OCEAN CLEAN!";
+            FontMetrics fm = g2d.getFontMetrics();
+            int x = (getWidth() - fm.stringWidth(msg)) / 2;
+            g2d.drawString(msg, x, getHeight()/2 - 10);
+
+            g2d.setColor(Color.WHITE);
+            g2d.setFont(new Font("Arial", Font.PLAIN, 20));
+            String subMsg = "You saved the reef.";
+            fm = g2d.getFontMetrics();
+            int x2 = (getWidth() - fm.stringWidth(subMsg)) / 2;
+            g2d.drawString(subMsg, x2, getHeight()/2 + 40);
+        }
     }
 }
