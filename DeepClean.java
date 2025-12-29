@@ -15,7 +15,7 @@ public class DeepClean extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
 
-        // Add the GamePanel to the container
+        // Add the separated GamePanel to the frame
         mainContainer.add(new GamePanel(), "Game");
         add(mainContainer);
     }
