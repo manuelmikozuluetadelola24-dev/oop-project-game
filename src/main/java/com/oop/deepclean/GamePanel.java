@@ -58,8 +58,13 @@ public class GamePanel extends JPanel implements ActionListener {
     // Input Flags
     private boolean up, down, left, right;
     private Timer gameTimer;
+    
+    // For returning to title screen
+    private DeepCleanGame controller;
 
-    public GamePanel() {
+    public GamePanel(DeepCleanGame controller) {
+        // Initialization
+        this.controller = controller;
         setFocusable(true);
         loadAssets();
         setupControls();
@@ -111,6 +116,10 @@ public class GamePanel extends JPanel implements ActionListener {
         gameTimer.restart();
         
         repaint();
+    }
+    
+    private void quitGame() {
+        controller.switchScreen(DeepCleanGame.TITLE_SCREEN);
     }
 
     private void loadAssets() {
@@ -169,6 +178,14 @@ public class GamePanel extends JPanel implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 resetGame();
+            }
+        });
+        
+        im.put(KeyStroke.getKeyStroke("Q"), "quit");
+        am.put("quit", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                quitGame();
             }
         });
     }
@@ -299,9 +316,9 @@ public class GamePanel extends JPanel implements ActionListener {
             // Draw Box
             g2d.setColor(Color.WHITE);
             g2d.setStroke(new java.awt.BasicStroke(5));
-            g2d.drawRect(getWidth()/2 - 200, getHeight()/2 - 120, 400, 240);
+            g2d.drawRect(getWidth()/2 - 200, getHeight()/2 - 120, 400, 300);
             g2d.setColor(Color.DARK_GRAY);
-            g2d.fillRect(getWidth()/2 - 200, getHeight()/2 - 120, 400, 240);
+            g2d.fillRect(getWidth()/2 - 200, getHeight()/2 - 120, 400, 300);
 
             // Draw Title
             g2d.setColor(Color.RED);
@@ -332,6 +349,13 @@ public class GamePanel extends JPanel implements ActionListener {
             String restartMsg = "Press 'R' to Play Again";
             int x4 = (getWidth() - fm.stringWidth(restartMsg)) / 2;
             g2d.drawString(restartMsg, x4, getHeight()/2 + 90);
+            
+            // Draw Quit Instructions
+            g2d.setColor(Color.RED);
+            g2d.setFont(new Font("Arial", Font.BOLD, 18));
+            String quitMsg = "press 'Q' to quit";
+            int x5 = (getWidth() - fm.stringWidth(quitMsg)) / 2;
+            g2d.drawString(quitMsg, x5, getHeight()/2 + 135);
         }
     }
 }

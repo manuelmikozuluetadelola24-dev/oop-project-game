@@ -22,7 +22,7 @@ public class DeepCleanGame extends JFrame {
         
         // Add the separated GamePanel to the frame
         mainContainer.add(new TitlePanel(this), TITLE_SCREEN);
-        mainContainer.add(new GamePanel(), GAME_SCREEN);
+        mainContainer.add(new GamePanel(this), GAME_SCREEN);
         add(mainContainer);
     }
 
