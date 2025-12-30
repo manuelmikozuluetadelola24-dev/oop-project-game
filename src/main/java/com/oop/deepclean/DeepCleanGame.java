@@ -53,8 +53,6 @@ public class DeepCleanGame extends JFrame {
             for (Component comp : mainContainer.getComponents()) {
                 if (comp instanceof GamePanel) {
                     comp.requestFocusInWindow();
-                    // Optional: Reset game state if entering for the first time or re-entering
-                    // ((GamePanel) comp).resetGame(); 
                 }
             }
         }
@@ -64,3 +62,4 @@ public class DeepCleanGame extends JFrame {
         SwingUtilities.invokeLater(() -> new DeepCleanGame().setVisible(true));
     }
 }
+
