@@ -27,14 +27,24 @@ public class TitlePanel extends JPanel {
         
         JButton playbtn = createButton("Play");
         JButton helpbtn = createButton("How to Play");
+
+        JButton quitbtn = createButton("Quit Game");
         
         playbtn.addActionListener(e -> controller.switchScreen(DeepCleanGame.GAME_SCREEN));
         helpbtn.addActionListener(e -> JOptionPane.showMessageDialog(this, "Use WASD to move around, collect trash by touching them, collect as much trash before the timer runs out."));
+
+        quitbtn.addActionListener(e -> System.exit(0));
         
         add(title);
+        add(Box.createVerticalStrut(20));
         add(playbtn);
-        add(helpbtn);
+        add(Box.createVerticalStrut(10));
         
+        
+        add(helpbtn);
+        add(Box.createVerticalStrut(10));
+
+        add(quitbtn);
     }
     
     private JButton createButton(String text) {
