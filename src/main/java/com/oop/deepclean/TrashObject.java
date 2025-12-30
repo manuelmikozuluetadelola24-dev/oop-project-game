@@ -1,3 +1,5 @@
+package com.oop.deepclean;
+
 import java.awt.Image;
 import java.awt.Rectangle;
 
