@@ -61,7 +61,7 @@ public class GamePanel extends JPanel implements ActionListener {
 
     public GamePanel(DeepCleanGame mainFrame) {
         this.mainFrame = mainFrame;
-
+        
         setFocusable(true); 
         loadAssets();
         setupControls();
